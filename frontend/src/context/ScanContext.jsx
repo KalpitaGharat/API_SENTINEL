@@ -29,6 +29,7 @@ export function ScanProvider({ children }) {
   const [selectedScanId, setSelectedScanId] = useState(null);
   const [activeScan, setActiveScan] = useState(null);
   const [findings, setFindings] = useState([]);
+  const [allFindings, setAllFindings] = useState([]);
   const [selectedFindingId, setSelectedFindingId] = useState(null);
   const [targets, setTargets] = useState([]);
   const [selectedTargetId, setSelectedTargetId] = useState(null);
@@ -65,6 +66,27 @@ export function ScanProvider({ children }) {
           }
           return prev;
         });
+      }
+
+      // Load cumulative findings across all scans for aggregate distribution
+      try {
+        let cumulative = [];
+        const all = await apiClient.getAllFindings().catch(() => null);
+        if (Array.isArray(all) && all.length > 0) {
+          cumulative = all;
+        } else if (items.length > 0) {
+          const findingsPromises = items.map((s) =>
+            apiClient.getScanFindings(s.id).catch(() => [])
+          );
+          const findingsArrays = await Promise.all(findingsPromises);
+          const flattened = findingsArrays.flat();
+          cumulative = Array.from(
+            new Map(flattened.map((f) => [f.id, f])).values()
+          );
+        }
+        setAllFindings(cumulative);
+      } catch (aggErr) {
+        console.warn('[ScanContext] Failed to aggregate cumulative findings:', aggErr);
       }
     } catch (err) {
       console.warn('[ScanContext] Failed to load scans from backend:', err);
@@ -385,6 +407,11 @@ export function ScanProvider({ children }) {
     selectedScanId,
     activeScan,
     findings,
+    allFindings,
+    totalScansCount: (scans || []).length,
+    totalVulnerabilitiesCount: (allFindings && allFindings.length > 0)
+      ? allFindings.length
+      : (scans || []).reduce((acc, s) => acc + (s.total_findings || s.vulnerabilities_found || 0), 0),
     selectedFindingId,
     targets,
     selectedTargetId,

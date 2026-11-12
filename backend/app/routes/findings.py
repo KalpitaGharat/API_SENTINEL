@@ -24,6 +24,38 @@ router = APIRouter(prefix="/api/findings", tags=["Findings"])
 
 
 @router.get(
+    "",
+    response_model=List[FindingResponse],
+    summary="Retrieve all findings across all scans",
+    description="Returns all security findings detected across all scan sessions, with optional filters.",
+)
+def list_all_findings(
+    severity: Optional[str] = Query(None, description="Filter by severity (Critical, High, Medium, Low)"),
+    category: Optional[str] = Query(None, description="Filter by category (BOLA, AUTH, etc.)"),
+    status_filter: Optional[str] = Query(None, alias="status", description="Filter by status (Open, Resolved)"),
+    limit: int = Query(500, ge=1, le=1000),
+    db: Session = Depends(get_db),
+):
+    """Retrieve findings across all scans for aggregate security telemetry."""
+    query = (
+        db.query(Finding)
+        .options(
+            joinedload(Finding.evidence),
+            joinedload(Finding.ai_explanation),
+        )
+    )
+    if severity and severity.lower() != "all":
+        query = query.filter(Finding.severity.ilike(severity))
+    if category and category.lower() != "all":
+        query = query.filter(Finding.category.ilike(category))
+    if status_filter and status_filter.lower() != "all":
+        query = query.filter(Finding.status.ilike(status_filter))
+
+    findings = query.order_by(Finding.created_at.desc()).limit(limit).all()
+    return [FindingResponse.model_validate(f) for f in findings]
+
+
+@router.get(
     "/{finding_id}",
     response_model=FindingResponse,
     summary="Retrieve finding details",

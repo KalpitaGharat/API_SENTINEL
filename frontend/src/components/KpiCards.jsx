@@ -9,10 +9,12 @@ import {
 import { useScanContext } from '../context/ScanContext';
 
 export default function KpiCards() {
-  const { scans, findings } = useScanContext();
+  const { scans, findings, allFindings } = useScanContext();
 
   const safeScans = Array.isArray(scans) ? scans : [];
-  const safeFindings = Array.isArray(findings) ? findings : [];
+  const safeFindings = (Array.isArray(allFindings) && allFindings.length > 0)
+    ? allFindings
+    : (Array.isArray(findings) ? findings : []);
 
   // 1. Metric: Total Scans
   const totalScans = safeScans.length;

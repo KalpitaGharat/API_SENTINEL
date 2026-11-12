@@ -2,13 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { useScanContext } from '../context/ScanContext';
 
 export default function SeverityDonutChart() {
-  const { findings } = useScanContext();
+  const { scans, allFindings, findings } = useScanContext();
 
-  const total = (findings || []).length;
-  const crit = (findings || []).filter((f) => (f.severity || '').toLowerCase() === 'critical').length;
-  const high = (findings || []).filter((f) => (f.severity || '').toLowerCase() === 'high').length;
-  const med = (findings || []).filter((f) => (f.severity || '').toLowerCase() === 'medium').length;
-  const low = (findings || []).filter((f) => (f.severity || '').toLowerCase() === 'low' || (f.severity || '').toLowerCase() === 'informational').length;
+  const safeScans = Array.isArray(scans) ? scans : [];
+  const totalScans = safeScans.length;
+
+  // Aggregate cumulative findings across all scans made (do not scope to a single scan)
+  const sourceFindings = Array.isArray(allFindings) && allFindings.length > 0
+    ? allFindings
+    : (Array.isArray(findings) ? findings : []);
+
+  const totalFromScans = safeScans.reduce(
+    (acc, s) => acc + (s.total_findings || s.vulnerabilities_found || 0),
+    0
+  );
+  const total = Math.max(sourceFindings.length, totalFromScans);
+
+  const crit = sourceFindings.filter((f) => (f.severity || '').toLowerCase() === 'critical').length;
+  const high = sourceFindings.filter((f) => (f.severity || '').toLowerCase() === 'high').length;
+  const med = sourceFindings.filter((f) => (f.severity || '').toLowerCase() === 'medium').length;
+  const low = sourceFindings.filter((f) => {
+    const s = (f.severity || '').toLowerCase();
+    return s === 'low' || s === 'informational';
+  }).length;
 
   const [centerCount, setCenterCount] = useState(0);
   const [hoveredIdx, setHoveredIdx] = useState(null);
@@ -24,7 +40,7 @@ export default function SeverityDonutChart() {
       current++;
       setCenterCount(current);
       if (current >= target) clearInterval(interval);
-    }, 30);
+    }, 25);
 
     return () => clearInterval(interval);
   }, [total]);
@@ -61,10 +77,31 @@ export default function SeverityDonutChart() {
         position: 'relative'
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <span style={{ fontSize: '15px', fontWeight: 700, color: '#E8F1FF' }}>
-          Vulnerability Severity Distribution
-        </span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+        <div>
+          <span style={{ fontSize: '15px', fontWeight: 700, color: '#E8F1FF' }}>
+            Vulnerability Severity Distribution
+          </span>
+          <div style={{ fontSize: '12px', color: '#6482A6', marginTop: '2px' }}>
+            Cumulative across all {totalScans} {totalScans === 1 ? 'total scan' : 'total scans'} conducted
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          <span
+            style={{
+              padding: '3px 9px',
+              borderRadius: '6px',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              background: 'rgba(0, 229, 255, 0.12)',
+              border: '1px solid rgba(0, 229, 255, 0.35)',
+              color: '#00E5FF',
+              letterSpacing: '0.02em'
+            }}
+          >
+            {totalScans} Total {totalScans === 1 ? 'Scan' : 'Scans'}
+          </span>
+        </div>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginTop: '4px' }}>
@@ -107,8 +144,11 @@ export default function SeverityDonutChart() {
             <div style={{ fontSize: '26px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1 }}>
               {centerCount}
             </div>
-            <div style={{ fontSize: '11px', color: '#8AA4C8', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '4px' }}>
-              Findings
+            <div style={{ fontSize: '10px', color: '#8AA4C8', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '4px' }}>
+              Vulnerabilities
+            </div>
+            <div style={{ fontSize: '10px', color: '#00E5FF', marginTop: '2px', fontWeight: 600 }}>
+              Across {totalScans} {totalScans === 1 ? 'Scan' : 'Scans'}
             </div>
           </div>
         </div>
@@ -141,7 +181,7 @@ export default function SeverityDonutChart() {
           ))}
           {total === 0 && (
             <div style={{ color: '#6482A6', fontSize: '12px', textAlign: 'center' }}>
-              No findings recorded.
+              No vulnerabilities recorded across {totalScans} scans.
             </div>
           )}
         </div>

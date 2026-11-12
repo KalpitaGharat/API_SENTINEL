@@ -127,6 +127,16 @@ export const apiClient = {
   },
 
   /** Findings & AI Explanations */
+  async getAllFindings({ severity = null, category = null, status = null, limit = 500 } = {}) {
+    const params = new URLSearchParams();
+    if (severity && severity !== 'All') params.append('severity', severity);
+    if (category && category !== 'All') params.append('category', category);
+    if (status && status !== 'All') params.append('status', status);
+    if (limit) params.append('limit', limit);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return request(`/api/findings${query}`);
+  },
+
   async getFinding(findingId) {
     if (!findingId) throw new ApiError('findingId is required', 400);
     return request(`/api/findings/${encodeURIComponent(findingId)}`);
