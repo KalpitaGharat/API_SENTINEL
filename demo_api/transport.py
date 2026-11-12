@@ -80,7 +80,12 @@ class DemoApiTransport(httpx.BaseTransport):
             # 6. Mode toggle
             elif path == "/api/demo/mode" and request.method == "POST":
                 body = json.loads(request.content.decode("utf-8")) if request.content else {}
-                res = toggle_demo_mode(ModeToggleRequest(**body))
+                admin_hdr = request.headers.get("X-Demo-Admin-Token")
+                res = toggle_demo_mode(
+                    ModeToggleRequest(**body),
+                    x_demo_admin_token=admin_hdr,
+                    authorization=auth_hdr,
+                )
                 return httpx.Response(200, json=res, headers=resp_headers, request=request)
 
             # Route not found

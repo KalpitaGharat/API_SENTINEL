@@ -8,6 +8,7 @@ Provides controlled endpoints with synthetic medical records to demonstrate:
 """
 
 import os
+import secrets
 from typing import Dict, Any, Optional
 from fastapi import FastAPI, Depends, HTTPException, Header, status, Request
 from fastapi.responses import JSONResponse
@@ -91,6 +92,7 @@ class LoginResponse(BaseModel):
 class ModeToggleRequest(BaseModel):
     vulnerable: bool
     enable_security_headers: Optional[bool] = None
+    admin_token: Optional[str] = None
 
 
 # -----------------------------------------------------------------------------
@@ -154,6 +156,7 @@ def health_check():
         "service": "healthcare_demo_api",
         "vulnerable_mode": settings.DEMO_VULNERABLE_MODE,
         "security_headers": settings.ENABLE_SECURITY_HEADERS or not settings.DEMO_VULNERABLE_MODE,
+        "admin_auth_configured": bool(settings.DEMO_ADMIN_TOKEN and settings.DEMO_ADMIN_TOKEN.strip()),
     }
 
 
@@ -237,9 +240,66 @@ def get_admin_metrics(authorization: Optional[str] = Header(None)):
     }
 
 
+def extract_and_verify_admin_token(
+    payload: ModeToggleRequest,
+    x_demo_admin_token: Optional[str] = None,
+    authorization: Optional[str] = None,
+) -> bool:
+    """Validate admin token using constant-time comparison against DEMO_ADMIN_TOKEN."""
+    expected = settings.DEMO_ADMIN_TOKEN
+    if not expected or not expected.strip():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized: Demo mode modification is disabled because DEMO_ADMIN_TOKEN is not configured on the server.",
+        )
+
+    # 1. Extract token from X-Demo-Admin-Token header
+    token = x_demo_admin_token
+
+    # 2. Extract token from Authorization: Bearer <token>
+    if not token and authorization:
+        parts = authorization.split()
+        if len(parts) == 2 and parts[0].lower() == "bearer":
+            token = parts[1]
+        elif len(parts) == 1:
+            token = parts[0]
+
+    # 3. Extract token from JSON payload body
+    if not token and payload.admin_token:
+        token = payload.admin_token
+
+    if not token or not token.strip():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized: Missing demo admin token. Provide 'X-Demo-Admin-Token', 'Authorization: Bearer <token>', or 'admin_token' in JSON body.",
+        )
+
+    # Constant-time comparison prevents timing analysis
+    if not secrets.compare_digest(token.strip(), expected.strip()):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized: Invalid demo admin token.",
+        )
+
+    return True
+
+
 @app.post("/api/demo/mode", tags=["Demo Controls"])
-def toggle_demo_mode(payload: ModeToggleRequest):
-    """Dynamic toggle between vulnerable and secure mode for live testing."""
+def toggle_demo_mode(
+    payload: ModeToggleRequest,
+    x_demo_admin_token: Optional[str] = Header(None, alias="X-Demo-Admin-Token"),
+    authorization: Optional[str] = Header(None),
+):
+    """Dynamic toggle between vulnerable and secure mode for live testing.
+
+    SECURITY PROTECTION:
+    Requires valid DEMO_ADMIN_TOKEN authorization via:
+    - 'X-Demo-Admin-Token' header
+    - 'Authorization: Bearer <DEMO_ADMIN_TOKEN>' header
+    - 'admin_token' field in JSON request body
+    """
+    extract_and_verify_admin_token(payload, x_demo_admin_token, authorization)
+
     settings.DEMO_VULNERABLE_MODE = payload.vulnerable
     if payload.enable_security_headers is not None:
         settings.ENABLE_SECURITY_HEADERS = payload.enable_security_headers

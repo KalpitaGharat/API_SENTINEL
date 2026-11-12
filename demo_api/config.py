@@ -11,10 +11,14 @@ class DemoSettings(BaseSettings):
     PORT: int = 8001
     
     # Toggle between vulnerable (BOLA present) and secure (ownership enforced) behavior
-    DEMO_VULNERABLE_MODE: bool = True
+    # Default is SECURE mode (False) for public deployment safety
+    DEMO_VULNERABLE_MODE: bool = False
     
     # Toggle security headers middleware
-    ENABLE_SECURITY_HEADERS: bool = False
+    ENABLE_SECURITY_HEADERS: bool = True
+
+    # Dedicated admin authorization token for mutating runtime mode
+    DEMO_ADMIN_TOKEN: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -25,6 +29,7 @@ class DemoSettings(BaseSettings):
 
 
 settings = DemoSettings(
-    DEMO_VULNERABLE_MODE=os.environ.get("DEMO_VULNERABLE_MODE", "true").lower() in ("true", "1", "yes"),
-    ENABLE_SECURITY_HEADERS=os.environ.get("ENABLE_SECURITY_HEADERS", "false").lower() in ("true", "1", "yes"),
+    DEMO_VULNERABLE_MODE=os.environ.get("DEMO_VULNERABLE_MODE", "false").lower() in ("true", "1", "yes"),
+    ENABLE_SECURITY_HEADERS=os.environ.get("ENABLE_SECURITY_HEADERS", "true").lower() in ("true", "1", "yes"),
+    DEMO_ADMIN_TOKEN=os.environ.get("DEMO_ADMIN_TOKEN", ""),
 )
