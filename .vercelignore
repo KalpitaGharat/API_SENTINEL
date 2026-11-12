@@ -1,0 +1,54 @@
+# API Sentinel — Vercel Deployment Ignore Rules
+# Exclude non-production services, local databases, and development artifacts
+
+# Excluded services (Streamlit Dashboard & Demo API)
+dashboard/
+demo_api/
+
+# Exclude SQLite databases, WAL, and SHM files (ephemeral / external DB used in prod)
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+api_sentinel.db*
+backend/api_sentinel.db*
+
+# Exclude local environment files containing credentials
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+ENV/
+
+# Node caches
+node_modules/
+frontend/node_modules/
+.npm/
+
+# Large release candidate zip files and generated test screenshots
+*.zip
+*.tar.gz
+*.png
+release_candidate_v1.1.0/
+
+# Development helper scripts
+scripts/
+start-development.ps1
+start-production.ps1
+stop-api-sentinel.ps1
+run.bat
+
+# Git metadata
+.git/
+.github/

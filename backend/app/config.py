@@ -4,6 +4,7 @@ Loads environment variables, validates settings, and provides
 centralized access to application configuration.
 """
 
+import os
 from pathlib import Path
 from typing import List
 from pydantic import field_validator
@@ -27,6 +28,14 @@ class Settings(BaseSettings):
 
     # Database configuration
     DATABASE_URL: str = "sqlite:///./api_sentinel.db"
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def adjust_database_url_for_vercel(cls, v: str) -> str:
+        """In serverless Vercel environments without an explicit external DB, use /tmp to prevent read-only fs error."""
+        if os.environ.get("VERCEL") and (not v or v == "sqlite:///./api_sentinel.db"):
+            return "sqlite:////tmp/api_sentinel.db"
+        return v
 
     # Safety Controls
     # In production, default to False to strictly block localhost/private IP scanning (SSRF protection).
