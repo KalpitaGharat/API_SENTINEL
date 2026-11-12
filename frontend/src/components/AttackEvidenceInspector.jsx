@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   X, 
   ShieldAlert, 
@@ -897,7 +898,7 @@ export default function AttackEvidenceInspector({
     return cardContent;
   }
 
-  return (
+  const modalOverlay = (
     <div 
       style={{
         position: 'fixed',
@@ -907,7 +908,8 @@ export default function AttackEvidenceInspector({
         bottom: 0,
         backgroundColor: 'rgba(2, 6, 17, 0.85)',
         backdropFilter: 'blur(8px)',
-        zIndex: 1000,
+        WebkitBackdropFilter: 'blur(8px)',
+        zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -922,4 +924,8 @@ export default function AttackEvidenceInspector({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' && document.body
+    ? createPortal(modalOverlay, document.body)
+    : modalOverlay;
 }
