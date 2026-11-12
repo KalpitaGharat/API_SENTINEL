@@ -364,4 +364,28 @@ test('Frontend Architecture & Build Integrity', async (t) => {
     assert.ok(scanHistoryContent.includes("setActivePage('evidence'"), 'ScanHistory must provide direct navigation to evidence');
     assert.ok(scanHistoryContent.includes("setActivePage('retesting'"), 'ScanHistory must provide direct navigation to retesting');
   });
+
+  await t.test('15. All-Time Vulnerability Distribution chart and analytics integration', () => {
+    const donutPath = path.join(frontendRoot, 'src', 'components', 'SeverityDonutChart.jsx');
+    const apiClientPath = path.join(frontendRoot, 'src', 'services', 'apiClient.js');
+    const scanContextPath = path.join(frontendRoot, 'src', 'context', 'ScanContext.jsx');
+
+    assert.ok(fs.existsSync(donutPath), 'SeverityDonutChart.jsx must exist');
+    const donutContent = fs.readFileSync(donutPath, 'utf8');
+    const apiClientContent = fs.readFileSync(apiClientPath, 'utf8');
+    const scanContextContent = fs.readFileSync(scanContextPath, 'utf8');
+
+    // 1. Chart title and all-time semantics
+    assert.ok(donutContent.includes('All-Time Vulnerability Distribution'), 'Chart must render All-Time Vulnerability Distribution title');
+    assert.ok(donutContent.includes('persisted historical scans') || donutContent.includes('persisted scan'), 'Chart must indicate persisted historical scans');
+    assert.ok(donutContent.includes('Deduplicated from'), 'Chart must display deduplication telemetry');
+
+    // 2. ApiClient analytics endpoint
+    assert.ok(apiClientContent.includes('getAllTimeAnalytics'), 'apiClient must implement getAllTimeAnalytics');
+    assert.ok(apiClientContent.includes('/analytics/all-time'), 'apiClient must reference /analytics/all-time endpoint');
+
+    // 3. ScanContext state and live refresh
+    assert.ok(scanContextContent.includes('allTimeAnalytics'), 'ScanContext must provide allTimeAnalytics state');
+    assert.ok(scanContextContent.includes('refreshAllTimeAnalytics'), 'ScanContext must provide refreshAllTimeAnalytics');
+  });
 });

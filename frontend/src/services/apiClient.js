@@ -127,6 +127,10 @@ export const apiClient = {
   },
 
   /** Findings & AI Explanations */
+  async getAllTimeAnalytics() {
+    return request('/api/findings/analytics/all-time');
+  },
+
   async getAllFindings({ severity = null, category = null, status = null, limit = 500 } = {}) {
     const params = new URLSearchParams();
     if (severity && severity !== 'All') params.append('severity', severity);

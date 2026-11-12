@@ -10,8 +10,10 @@ from app.schemas import (
     ScanResponse,
     ScanListResponse,
     FindingResponse,
+    AllTimeAnalyticsResponse,
 )
 from app.services.scan_service import ScanService
+from app.services.analytics_service import AnalyticsService
 
 router = APIRouter(prefix="/api/scans", tags=["Scans"])
 
@@ -49,6 +51,19 @@ def list_scans(
         total=total,
         items=[ScanResponse.model_validate(item) for item in items],
     )
+
+
+@router.get(
+    "/analytics/all-time",
+    response_model=AllTimeAnalyticsResponse,
+    summary="Retrieve cumulative all-time security analytics (scans alias)",
+    description="Returns deduplicated vulnerability counts, severity distribution, and resolution stats across all historical scans.",
+)
+def get_all_time_scans_analytics(
+    db: Session = Depends(get_db),
+):
+    """Retrieve persistent all-time security metrics aggregated across all historical scans."""
+    return AnalyticsService.get_all_time_analytics(db=db)
 
 
 @router.get(

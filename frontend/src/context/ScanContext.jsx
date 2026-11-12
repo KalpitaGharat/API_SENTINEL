@@ -30,6 +30,15 @@ export function ScanProvider({ children }) {
   const [activeScan, setActiveScan] = useState(null);
   const [findings, setFindings] = useState([]);
   const [allFindings, setAllFindings] = useState([]);
+  const [allTimeAnalytics, setAllTimeAnalytics] = useState({
+    total_scans: 0,
+    total_unique_findings: 0,
+    total_occurrences: 0,
+    severity_distribution: { critical: 0, high: 0, medium: 0, low: 0, informational: 0 },
+    severity_percentages: { critical: 0, high: 0, medium: 0, low: 0, informational: 0 },
+    resolved_findings: 0,
+    unresolved_findings: 0,
+  });
   const [selectedFindingId, setSelectedFindingId] = useState(null);
   const [targets, setTargets] = useState([]);
   const [selectedTargetId, setSelectedTargetId] = useState(null);
@@ -94,6 +103,18 @@ export function ScanProvider({ children }) {
       setBackendError(err.message);
     } finally {
       setIsLoadingScans(false);
+    }
+  }, []);
+
+  // Fetch persistent all-time security analytics across all historical scans
+  const refreshAllTimeAnalytics = useCallback(async () => {
+    try {
+      const data = await apiClient.getAllTimeAnalytics();
+      if (data && typeof data === 'object') {
+        setAllTimeAnalytics(data);
+      }
+    } catch (err) {
+      console.warn('[ScanContext] Failed to load all-time analytics from backend:', err);
     }
   }, []);
 
@@ -173,7 +194,8 @@ export function ScanProvider({ children }) {
   useEffect(() => {
     refreshScans();
     refreshTargets();
-  }, [refreshScans, refreshTargets]);
+    refreshAllTimeAnalytics();
+  }, [refreshScans, refreshTargets, refreshAllTimeAnalytics]);
 
   // Auto-refresh findings when selected scan changes
   useEffect(() => {
@@ -255,6 +277,7 @@ export function ScanProvider({ children }) {
           try {
             const data = JSON.parse(e.data);
             refreshScans(data.scan_id);
+            refreshAllTimeAnalytics();
             setNotifications((prev) => [
               {
                 id: `evt-${Date.now()}-${Math.random()}`,
@@ -295,6 +318,7 @@ export function ScanProvider({ children }) {
             if (data.scan_id) {
               refreshFindings(data.scan_id);
             }
+            refreshAllTimeAnalytics();
 
             // If not previously acknowledged, show prominent popup modal immediately
             if (!acknowledgedIdsRef.current.has(data.finding_id)) {
@@ -310,6 +334,7 @@ export function ScanProvider({ children }) {
             const data = JSON.parse(e.data);
             refreshScans(data.scan_id);
             refreshFindings(data.scan_id);
+            refreshAllTimeAnalytics();
             setNotifications((prev) => [
               {
                 id: `evt-${Date.now()}-${Math.random()}`,
@@ -408,10 +433,13 @@ export function ScanProvider({ children }) {
     activeScan,
     findings,
     allFindings,
+    allTimeAnalytics,
     totalScansCount: (scans || []).length,
-    totalVulnerabilitiesCount: (allFindings && allFindings.length > 0)
-      ? allFindings.length
-      : (scans || []).reduce((acc, s) => acc + (s.total_findings || s.vulnerabilities_found || 0), 0),
+    totalVulnerabilitiesCount: (allTimeAnalytics?.total_unique_findings > 0)
+      ? allTimeAnalytics.total_unique_findings
+      : ((allFindings && allFindings.length > 0)
+          ? allFindings.length
+          : (scans || []).reduce((acc, s) => acc + (s.total_findings || s.vulnerabilities_found || 0), 0)),
     selectedFindingId,
     targets,
     selectedTargetId,
@@ -428,6 +456,7 @@ export function ScanProvider({ children }) {
     refreshScans,
     refreshFindings,
     refreshTargets,
+    refreshAllTimeAnalytics,
     selectScan,
     setSelectedScanId,
     selectFinding,

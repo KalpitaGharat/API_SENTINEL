@@ -1,33 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { useScanContext } from '../context/ScanContext';
+import apiClient from '../services/apiClient';
 
 export default function SeverityDonutChart() {
-  const { scans, allFindings, findings } = useScanContext();
+  const { scans, allTimeAnalytics, refreshAllTimeAnalytics } = useScanContext();
 
-  const safeScans = Array.isArray(scans) ? scans : [];
-  const totalScans = safeScans.length;
-
-  // Aggregate cumulative findings across all scans made (do not scope to a single scan)
-  const sourceFindings = Array.isArray(allFindings) && allFindings.length > 0
-    ? allFindings
-    : (Array.isArray(findings) ? findings : []);
-
-  const totalFromScans = safeScans.reduce(
-    (acc, s) => acc + (s.total_findings || s.vulnerabilities_found || 0),
-    0
-  );
-  const total = Math.max(sourceFindings.length, totalFromScans);
-
-  const crit = sourceFindings.filter((f) => (f.severity || '').toLowerCase() === 'critical').length;
-  const high = sourceFindings.filter((f) => (f.severity || '').toLowerCase() === 'high').length;
-  const med = sourceFindings.filter((f) => (f.severity || '').toLowerCase() === 'medium').length;
-  const low = sourceFindings.filter((f) => {
-    const s = (f.severity || '').toLowerCase();
-    return s === 'low' || s === 'informational';
-  }).length;
-
+  const [localAnalytics, setLocalAnalytics] = useState(allTimeAnalytics || null);
   const [centerCount, setCenterCount] = useState(0);
   const [hoveredIdx, setHoveredIdx] = useState(null);
+
+  // Sync with ScanContext state or fetch directly if needed
+  useEffect(() => {
+    if (allTimeAnalytics && allTimeAnalytics.total_unique_findings !== undefined) {
+      setLocalAnalytics(allTimeAnalytics);
+    } else {
+      let isMounted = true;
+      apiClient.getAllTimeAnalytics()
+        .then((data) => {
+          if (isMounted && data) {
+            setLocalAnalytics(data);
+          }
+        })
+        .catch((err) => {
+          console.warn('[SeverityDonutChart] Direct analytics fetch fallback error:', err);
+        });
+      return () => { isMounted = false; };
+    }
+  }, [allTimeAnalytics]);
+
+  const totalScans = localAnalytics?.total_scans ?? (scans || []).length;
+  const total = localAnalytics?.total_unique_findings ?? 0;
+  const totalOccurrences = localAnalytics?.total_occurrences ?? total;
+  const resolvedCount = localAnalytics?.resolved_findings ?? 0;
+  const unresolvedCount = localAnalytics?.unresolved_findings ?? 0;
+
+  const dist = localAnalytics?.severity_distribution || {};
+  const pcts = localAnalytics?.severity_percentages || {};
+
+  const critCount = dist.critical || 0;
+  const highCount = dist.high || 0;
+  const medCount = dist.medium || 0;
+  const lowCount = dist.low || 0;
+  const infoCount = dist.informational || 0;
+
+  const critPct = pcts.critical ?? (total > 0 ? Math.round((critCount / total) * 100) : 0);
+  const highPct = pcts.high ?? (total > 0 ? Math.round((highCount / total) * 100) : 0);
+  const medPct = pcts.medium ?? (total > 0 ? Math.round((medCount / total) * 100) : 0);
+  const lowPct = pcts.low ?? (total > 0 ? Math.round((lowCount / total) * 100) : 0);
+  const infoPct = pcts.informational ?? (total > 0 ? Math.round((infoCount / total) * 100) : 0);
 
   useEffect(() => {
     let current = 0;
@@ -46,10 +66,11 @@ export default function SeverityDonutChart() {
   }, [total]);
 
   const segments = total === 0 ? [] : [
-    { id: 'crit', label: 'Critical', count: crit, percent: Math.round((crit / total) * 100), color: '#FF4D5E' },
-    { id: 'high', label: 'High', count: high, percent: Math.round((high / total) * 100), color: '#FF8A1F' },
-    { id: 'med', label: 'Medium', count: med, percent: Math.round((med / total) * 100), color: '#FFD21F' },
-    { id: 'low', label: 'Low', count: low, percent: Math.round((low / total) * 100), color: '#00E5FF' },
+    { id: 'crit', label: 'Critical', count: critCount, percent: critPct, color: '#FF4D5E' },
+    { id: 'high', label: 'High', count: highCount, percent: highPct, color: '#FF8A1F' },
+    { id: 'med', label: 'Medium', count: medCount, percent: medPct, color: '#FFD21F' },
+    { id: 'low', label: 'Low', count: lowCount, percent: lowPct, color: '#00E5FF' },
+    ...(infoCount > 0 ? [{ id: 'info', label: 'Informational', count: infoCount, percent: infoPct, color: '#38BDF8' }] : []),
   ];
 
   // Geometry
@@ -80,10 +101,10 @@ export default function SeverityDonutChart() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
         <div>
           <span style={{ fontSize: '15px', fontWeight: 700, color: '#E8F1FF' }}>
-            Vulnerability Severity Distribution
+            All-Time Vulnerability Distribution
           </span>
           <div style={{ fontSize: '12px', color: '#6482A6', marginTop: '2px' }}>
-            Cumulative across all {totalScans} {totalScans === 1 ? 'total scan' : 'total scans'} conducted
+            Cumulative across {totalScans} {totalScans === 1 ? 'persisted scan' : 'persisted historical scans'}
           </div>
         </div>
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
@@ -99,7 +120,7 @@ export default function SeverityDonutChart() {
               letterSpacing: '0.02em'
             }}
           >
-            {totalScans} Total {totalScans === 1 ? 'Scan' : 'Scans'}
+            {totalScans} {totalScans === 1 ? 'Scan' : 'Scans'} Historical
           </span>
         </div>
       </div>
@@ -145,7 +166,7 @@ export default function SeverityDonutChart() {
               {centerCount}
             </div>
             <div style={{ fontSize: '10px', color: '#8AA4C8', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: '4px' }}>
-              Vulnerabilities
+              Unique Findings
             </div>
             <div style={{ fontSize: '10px', color: '#00E5FF', marginTop: '2px', fontWeight: 600 }}>
               Across {totalScans} {totalScans === 1 ? 'Scan' : 'Scans'}
@@ -153,7 +174,7 @@ export default function SeverityDonutChart() {
           </div>
         </div>
 
-        {/* Legend */}
+        {/* Legend with Counts and Percentages */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
           {segments.map((seg) => (
             <div 
@@ -174,9 +195,14 @@ export default function SeverityDonutChart() {
                 <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: seg.color }} />
                 <span style={{ color: '#8AA4C8' }}>{seg.label}</span>
               </div>
-              <span className="font-mono-code" style={{ color: '#FFFFFF', fontWeight: 700 }}>
-                {seg.count}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span className="font-mono-code" style={{ color: '#FFFFFF', fontWeight: 700 }}>
+                  {seg.count}
+                </span>
+                <span style={{ color: '#6482A6', fontSize: '11px' }}>
+                  ({seg.percent}%)
+                </span>
+              </div>
             </div>
           ))}
           {total === 0 && (
@@ -184,6 +210,33 @@ export default function SeverityDonutChart() {
               No vulnerabilities recorded across {totalScans} scans.
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Persistent Status & Deduplication Telemetry Footer */}
+      <div
+        style={{
+          marginTop: '12px',
+          paddingTop: '10px',
+          borderTop: '1px solid rgba(15, 47, 78, 0.6)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: '0.74rem',
+          color: '#6482A6',
+          flexWrap: 'wrap',
+          gap: '6px',
+        }}
+      >
+        <div>
+          <span>Deduplicated from </span>
+          <strong className="font-mono-code" style={{ color: '#E8F1FF' }}>{totalOccurrences}</strong>
+          <span> detections</span>
+        </div>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <span>Resolved: <strong style={{ color: '#22C55E' }}>{resolvedCount}</strong></span>
+          <span>•</span>
+          <span>Open: <strong style={{ color: '#FF4D5E' }}>{unresolvedCount}</strong></span>
         </div>
       </div>
     </div>

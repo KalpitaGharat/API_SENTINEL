@@ -15,8 +15,10 @@ from app.schemas import (
     AIExplanationResponse,
     RetestHistoryItemResponse,
     RetestHistoryListResponse,
+    AllTimeAnalyticsResponse,
 )
 from app.services.ai_service import ai_service
+from app.services.analytics_service import AnalyticsService
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +55,24 @@ def list_all_findings(
 
     findings = query.order_by(Finding.created_at.desc()).limit(limit).all()
     return [FindingResponse.model_validate(f) for f in findings]
+
+
+@router.get(
+    "/analytics/all-time",
+    response_model=AllTimeAnalyticsResponse,
+    summary="Retrieve cumulative all-time security analytics",
+    description="Returns deduplicated vulnerability counts, severity distribution, and resolution stats across all historical scans.",
+)
+@router.get(
+    "/all-time-analytics",
+    response_model=AllTimeAnalyticsResponse,
+    include_in_schema=False,
+)
+def get_all_time_findings_analytics(
+    db: Session = Depends(get_db),
+):
+    """Retrieve persistent all-time security metrics aggregated across all historical scans."""
+    return AnalyticsService.get_all_time_analytics(db=db)
 
 
 @router.get(

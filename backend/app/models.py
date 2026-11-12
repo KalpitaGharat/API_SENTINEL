@@ -73,6 +73,11 @@ class Finding(Base):
     ai_explanation = relationship("AIExplanation", back_populates="finding", uselist=False, cascade="all, delete-orphan")
 
 
+# Aliases for explicit domain model naming
+ScanRecord = Scan
+FindingRecord = Finding
+
+
 class Evidence(Base):
     """Technical proof and request/response telemetry verifying a finding."""
 

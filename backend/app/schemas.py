@@ -663,5 +663,38 @@ class TargetScanRequest(BaseModel):
     )
 
 
+# -----------------------------------------------------------------------------
+# All-Time Security Analytics Schemas
+# -----------------------------------------------------------------------------
+
+class SeverityDistribution(BaseModel):
+    """Cumulative unique finding counts categorized by severity."""
+    critical: int = Field(0, description="Total unique critical vulnerabilities")
+    high: int = Field(0, description="Total unique high vulnerabilities")
+    medium: int = Field(0, description="Total unique medium vulnerabilities")
+    low: int = Field(0, description="Total unique low vulnerabilities")
+    informational: int = Field(0, description="Total unique informational vulnerabilities")
+
+
+class AllTimeAnalyticsResponse(BaseModel):
+    """Persistent all-time security analytics across all historical scans."""
+    total_scans: int = Field(0, description="Total persisted scans conducted across all time")
+    total_unique_findings: int = Field(0, description="Total deduplicated unique vulnerabilities")
+    total_occurrences: int = Field(0, description="Total raw finding detections across all scans")
+    severity_distribution: SeverityDistribution = Field(default_factory=SeverityDistribution)
+    severity_percentages: Dict[str, float] = Field(default_factory=dict)
+    resolved_findings: int = Field(0, description="Total unique findings currently verified resolved")
+    unresolved_findings: int = Field(0, description="Total unique findings currently open or unresolved")
+    total_resolved: Optional[int] = Field(None, description="Alias for resolved_findings")
+    total_unresolved: Optional[int] = Field(None, description="Alias for unresolved_findings")
+
+    @model_validator(mode="after")
+    def sync_aliases(self) -> "AllTimeAnalyticsResponse":
+        if self.total_resolved is None:
+            self.total_resolved = self.resolved_findings
+        if self.total_unresolved is None:
+            self.total_unresolved = self.unresolved_findings
+        return self
+
 
 
