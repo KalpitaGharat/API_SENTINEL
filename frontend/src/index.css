@@ -1,0 +1,226 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === API SENTINEL CYBER COMMAND CENTER TOKENS === */
+:root {
+  --bg-primary: #050D1F;
+  --bg-gradient-end: #071A33;
+  --bg-sidebar: #07182B;
+  --bg-panel: rgba(8, 24, 46, 0.72);
+  --border-panel: rgba(0, 180, 240, 0.18);
+  --border-panel-glow: rgba(0, 229, 255, 0.4);
+  
+  --cyan-primary: #00E5FF;
+  --teal-accent: #14B8A6;
+  --blue-accent: #2563EB;
+  --violet-accent: #8B5CF6;
+  
+  --critical-red: #FF4D5E;
+  --high-orange: #FF8A1F;
+  --medium-yellow: #FFD21F;
+  --low-cyan: #00E5FF;
+  --success-green: #22C55E;
+  
+  --text-white: #FFFFFF;
+  --text-muted: #8AA4C8;
+  --text-dim: #6482A6;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-white);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Monospace font utility */
+.font-mono-code {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* === Panel Glass & HUD Cards (Exact Match to Image 1) === */
+.cyber-card,
+.sentinel-card {
+  background: var(--bg-panel);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-panel);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 
+              0 0 20px rgba(0, 180, 240, 0.06);
+  position: relative;
+  box-sizing: border-box;
+  min-width: 0;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cyber-card:hover,
+.sentinel-card:hover {
+  border-color: rgba(0, 229, 255, 0.35);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.45), 
+              0 0 24px rgba(0, 229, 255, 0.12);
+}
+
+/* Hide any legacy corner brackets to keep cards clean and modern */
+.hud-corner {
+  display: none !important;
+}
+
+/* Boot Sequence Cascade Animations */
+@keyframes bootCascade {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.boot-anim {
+  animation: bootCascade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Completion Cyan Flicker */
+@keyframes cyanFlicker {
+  0%, 100% { color: var(--text-white); }
+  50% { color: #00E5FF; text-shadow: 0 0 10px rgba(0, 229, 255, 0.8); }
+}
+
+.flicker-on-finish {
+  animation: cyanFlicker 0.4s ease-out 1.1s 1;
+}
+
+/* Active Nav Item Breathing Glow */
+@keyframes navGlowBreathe {
+  0% {
+    box-shadow: 0 0 16px rgba(0, 229, 255, 0.3), inset 0 0 10px rgba(0, 229, 255, 0.1);
+    border-color: rgba(0, 229, 255, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 24px rgba(0, 229, 255, 0.5), inset 0 0 14px rgba(0, 229, 255, 0.2);
+    border-color: #00E5FF;
+  }
+}
+
+.nav-active-glow {
+  animation: navGlowBreathe 3s ease-in-out infinite alternate;
+}
+
+/* Left accent bar on active nav */
+.nav-active-bar {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3.5px;
+  border-radius: 0 3px 3px 0;
+  background: #00E5FF;
+  box-shadow: 0 0 12px #00E5FF;
+}
+
+/* Fullscreen Trigger Scanline on Scan button click */
+@keyframes fullTriggerScan {
+  0% { transform: translateY(-100%); opacity: 1; }
+  100% { transform: translateY(105vh); opacity: 0.8; }
+}
+
+.trigger-scanline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 250px;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 229, 255, 0.22) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 9999;
+  animation: fullTriggerScan 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Traveling laser comet shimmer on KPI sparklines */
+@keyframes kpiLaserSweep {
+  0% { stroke-dashoffset: 180; opacity: 0; }
+  15% { opacity: 0.95; }
+  85% { opacity: 0.95; }
+  100% { stroke-dashoffset: -180; opacity: 0; }
+}
+
+.kpi-laser-shimmer {
+  animation: kpiLaserSweep 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* CTA Scan Button */
+.cta-cyber-button {
+  background: #00E5FF;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+  color: #040813;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cta-cyber-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 28px rgba(0, 229, 255, 0.6);
+}
+
+.cta-cyber-button:active {
+  transform: scale(0.98);
+}
+
+/* Toast Notification Slide-in from top right */
+@keyframes toastSlideIn {
+  0% { opacity: 0; transform: translateX(100%) translateY(-10px); }
+  100% { opacity: 1; transform: translateX(0) translateY(0); }
+}
+
+.toast-slide-anim {
+  animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Responsive Support (< 1280px) */
+@media (max-width: 1280px) {
+  .sidebar-container {
+    width: 76px !important;
+    min-width: 76px !important;
+    max-width: 76px !important;
+    padding: 20px 10px !important;
+  }
+  .sidebar-container .sidebar-nav-item span,
+  .sidebar-container .tagline-container,
+  .sidebar-brand-text {
+    display: none !important;
+  }
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .charts-grid,
+  .bottom-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Prefers-reduced-motion fallback */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

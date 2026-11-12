@@ -1,0 +1,120 @@
+{
+  "catalog_name": "GitHub Supported Secret Scanning Patterns (API Key & Token Reference)",
+  "reference_source": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns",
+  "retrieval_date": "2026-11-11",
+  "license": "GitHub Documentation (CC BY 4.0 / Documentation Reference)",
+  "attribution": "GitHub Secret Scanning Documentation and Partner Pattern Catalog",
+  "scope": "Strictly limited to API Keys and API Tokens. Generic passwords, certificates, SSH private keys, and database connection URIs are deliberately excluded.",
+  "patterns": [
+    {
+      "provider": "aws",
+      "credential_type": "api_key",
+      "name": "AWS Access Key ID",
+      "regex": "(?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}",
+      "primary_prefix": "AKIA",
+      "token_length": 20,
+      "character_set": "Base32 / Uppercase Alphanumeric",
+      "source_url": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns#aws",
+      "limitations": "Matches format of standard 20-character AWS Access Key ID. Does not verify whether IAM key is active or revoked."
+    },
+    {
+      "provider": "openai",
+      "credential_type": "api_key",
+      "name": "OpenAI API Key",
+      "regex": "sk-(?:proj-|admin-|none-)?[a-zA-Z0-9_-]{32,96}",
+      "primary_prefix": "sk-proj-",
+      "token_length": 51,
+      "character_set": "Base64url Alphanumeric with hyphens/underscores",
+      "source_url": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns#openai",
+      "limitations": "Covers both legacy sk-[a-zA-Z0-9]{48} and project-scoped sk-proj-... formats."
+    },
+    {
+      "provider": "nvidia",
+      "credential_type": "api_key",
+      "name": "NVIDIA NGC API Key",
+      "regex": "nvapi-[a-zA-Z0-9_-]{64}",
+      "primary_prefix": "nvapi-",
+      "token_length": 70,
+      "character_set": "Alphanumeric with hyphens and underscores",
+      "source_url": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns#nvidia",
+      "limitations": "NGC and NVIDIA NIM inference catalog API keys."
+    },
+    {
+      "provider": "github",
+      "credential_type": "api_token",
+      "name": "GitHub Personal Access Token / OAuth Token",
+      "regex": "(?:ghp|gho|ghu|ghs|ghr)_[a-zA-Z0-9]{36,255}",
+      "primary_prefix": "ghp_",
+      "token_length": 40,
+      "character_set": "Alphanumeric with provider prefix",
+      "source_url": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns#github",
+      "limitations": "Matches modern GitHub token formats including ghp (personal), gho (OAuth), and ghs (server-to-server)."
+    },
+    {
+      "provider": "google_cloud",
+      "credential_type": "api_key",
+      "name": "Google Cloud / Firebase API Key",
+      "regex": "AIza[0-9A-Za-z\\-_]{35}",
+      "primary_prefix": "AIza",
+      "token_length": 39,
+      "character_set": "Base64url alphanumeric",
+      "source_url": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns#google",
+      "limitations": "Identifies standard 39-character AIza API key format for GCP, Maps, and Firebase."
+    },
+    {
+      "provider": "stripe",
+      "credential_type": "api_key",
+      "name": "Stripe Live / Restricted API Key",
+      "regex": "(?:sk_live|rk_live)_[0-9a-zA-Z]{24,99}",
+      "primary_prefix": "sk_live_",
+      "token_length": 32,
+      "character_set": "Alphanumeric",
+      "source_url": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns#stripe",
+      "limitations": "Targets production live secret keys (sk_live_) and restricted access keys (rk_live_)."
+    },
+    {
+      "provider": "azure",
+      "credential_type": "api_key",
+      "name": "Azure Storage / Cognitive Services API Key",
+      "regex": "(?:AccountKey=[a-zA-Z0-9+/=]{86,88}|[a-f0-9]{32})",
+      "primary_prefix": "AccountKey=",
+      "token_length": 88,
+      "character_set": "Base64 or 32-char hex",
+      "source_url": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns#microsoft-azure",
+      "limitations": "Supports both Azure Storage AccountKey connection string secrets and Cognitive Services 32-hex keys."
+    },
+    {
+      "provider": "slack",
+      "credential_type": "api_token",
+      "name": "Slack Bot / User API Token",
+      "regex": "xox(?:b|p|a|r)-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24,32}",
+      "primary_prefix": "xoxb-",
+      "token_length": 55,
+      "character_set": "Hyphen-delimited numeric account blocks followed by alphanumeric token",
+      "source_url": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns#slack",
+      "limitations": "Standard Slack Bot (xoxb-) and User (xoxp-) token schemas."
+    },
+    {
+      "provider": "twilio",
+      "credential_type": "api_key",
+      "name": "Twilio API Key",
+      "regex": "SK[0-9a-fA-F]{32}",
+      "primary_prefix": "SK",
+      "token_length": 34,
+      "character_set": "Hexadecimal with SK prefix",
+      "source_url": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns#twilio",
+      "limitations": "Twilio developer API Key format starting with SK followed by 32 hex chars."
+    },
+    {
+      "provider": "generic_api_key",
+      "credential_type": "api_key",
+      "name": "Generic High-Entropy API Key",
+      "regex": "(?:api[_-]?key|apikey|access[_-]?token)['\"\\s:=]+([a-zA-Z0-9_-]{32,64})",
+      "primary_prefix": "api_key_",
+      "token_length": 40,
+      "character_set": "High-entropy alphanumeric strings associated with API key assignment patterns",
+      "source_url": "https://docs.github.com/en/code-security/reference/secret-security/supported-secret-scanning-patterns",
+      "limitations": "Identifies generic 32-64 character high-entropy tokens when associated with explicit API key identifiers."
+    }
+  ]
+}

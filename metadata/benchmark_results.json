@@ -1,0 +1,274 @@
+{
+  "benchmark_id": "bench_1794475970",
+  "timestamp": "2026-11-12T09:32:50.102270+00:00",
+  "engine_version": "1.0.0",
+  "dataset_split": "api_keys_test.jsonl",
+  "total_samples": 1500,
+  "duration_ms": 48.47,
+  "metrics": {
+    "precision": 84.43,
+    "recall": 90.4,
+    "f1": 87.31,
+    "accuracy": 86.87,
+    "tp": 678,
+    "fp": 125,
+    "tn": 625,
+    "fn": 72
+  },
+  "per_provider": [
+    {
+      "provider": "aws",
+      "samples": 150,
+      "tp": 75,
+      "fp": 20,
+      "tn": 55,
+      "fn": 0,
+      "precision": 78.95,
+      "recall": 100.0,
+      "f1": 88.24,
+      "accuracy": 86.67
+    },
+    {
+      "provider": "azure",
+      "samples": 150,
+      "tp": 75,
+      "fp": 0,
+      "tn": 75,
+      "fn": 0,
+      "precision": 100.0,
+      "recall": 100.0,
+      "f1": 100.0,
+      "accuracy": 100.0
+    },
+    {
+      "provider": "generic_api_key",
+      "samples": 150,
+      "tp": 30,
+      "fp": 35,
+      "tn": 40,
+      "fn": 45,
+      "precision": 46.15,
+      "recall": 40.0,
+      "f1": 42.86,
+      "accuracy": 46.67
+    },
+    {
+      "provider": "github",
+      "samples": 150,
+      "tp": 75,
+      "fp": 11,
+      "tn": 64,
+      "fn": 0,
+      "precision": 87.21,
+      "recall": 100.0,
+      "f1": 93.17,
+      "accuracy": 92.67
+    },
+    {
+      "provider": "google_cloud",
+      "samples": 150,
+      "tp": 74,
+      "fp": 7,
+      "tn": 68,
+      "fn": 1,
+      "precision": 91.36,
+      "recall": 98.67,
+      "f1": 94.87,
+      "accuracy": 94.67
+    },
+    {
+      "provider": "nvidia",
+      "samples": 150,
+      "tp": 75,
+      "fp": 16,
+      "tn": 59,
+      "fn": 0,
+      "precision": 82.42,
+      "recall": 100.0,
+      "f1": 90.36,
+      "accuracy": 89.33
+    },
+    {
+      "provider": "openai",
+      "samples": 150,
+      "tp": 75,
+      "fp": 20,
+      "tn": 55,
+      "fn": 0,
+      "precision": 78.95,
+      "recall": 100.0,
+      "f1": 88.24,
+      "accuracy": 86.67
+    },
+    {
+      "provider": "slack",
+      "samples": 150,
+      "tp": 75,
+      "fp": 0,
+      "tn": 75,
+      "fn": 0,
+      "precision": 100.0,
+      "recall": 100.0,
+      "f1": 100.0,
+      "accuracy": 100.0
+    },
+    {
+      "provider": "stripe",
+      "samples": 150,
+      "tp": 49,
+      "fp": 2,
+      "tn": 73,
+      "fn": 26,
+      "precision": 96.08,
+      "recall": 65.33,
+      "f1": 77.78,
+      "accuracy": 81.33
+    },
+    {
+      "provider": "twilio",
+      "samples": 150,
+      "tp": 75,
+      "fp": 14,
+      "tn": 61,
+      "fn": 0,
+      "precision": 84.27,
+      "recall": 100.0,
+      "f1": 91.46,
+      "accuracy": 90.67
+    }
+  ],
+  "false_positives_sample": [
+    {
+      "sample_id": "sample_nvidia_neg_0192",
+      "provider": "nvidia",
+      "detected_as": "generic_api_key",
+      "masked_sample": "expo...fb7\"",
+      "notes": "Negative lookalike (hex40)"
+    },
+    {
+      "sample_id": "sample_generic_api_key_neg_0044",
+      "provider": "generic_api_key",
+      "detected_as": "azure",
+      "masked_sample": "chec...c18'",
+      "notes": "Negative lookalike (hex_hash)"
+    },
+    {
+      "sample_id": "sample_generic_api_key_neg_0437",
+      "provider": "generic_api_key",
+      "detected_as": "azure",
+      "masked_sample": "chec...639'",
+      "notes": "Negative lookalike (hex_hash)"
+    },
+    {
+      "sample_id": "sample_generic_api_key_neg_0281",
+      "provider": "generic_api_key",
+      "detected_as": "azure",
+      "masked_sample": "chec...c75'",
+      "notes": "Negative lookalike (hex_hash)"
+    },
+    {
+      "sample_id": "sample_aws_neg_0143",
+      "provider": "aws",
+      "detected_as": "generic_api_key",
+      "masked_sample": "curl...l/v1",
+      "notes": "Negative lookalike (uuid)"
+    },
+    {
+      "sample_id": "sample_github_neg_0390",
+      "provider": "github",
+      "detected_as": "generic_api_key",
+      "masked_sample": "cons... });",
+      "notes": "Negative lookalike (wrong_prefix)"
+    },
+    {
+      "sample_id": "sample_openai_neg_0085",
+      "provider": "openai",
+      "detected_as": "generic_api_key",
+      "masked_sample": "X-AP...d528",
+      "notes": "Negative lookalike (uuid)"
+    },
+    {
+      "sample_id": "sample_generic_api_key_neg_0336",
+      "provider": "generic_api_key",
+      "detected_as": "azure",
+      "masked_sample": "chec...8b9'",
+      "notes": "Negative lookalike (hex_hash)"
+    },
+    {
+      "sample_id": "sample_nvidia_neg_0353",
+      "provider": "nvidia",
+      "detected_as": "generic_api_key",
+      "masked_sample": "nvid...80f\"",
+      "notes": "Negative lookalike (hex40)"
+    },
+    {
+      "sample_id": "sample_aws_neg_0377",
+      "provider": "aws",
+      "detected_as": "azure",
+      "masked_sample": "b0a0...3365",
+      "notes": "Negative lookalike (hex32)"
+    }
+  ],
+  "false_negatives_sample": [
+    {
+      "sample_id": "sample_stripe_pos_0013",
+      "provider": "stripe",
+      "masked_sample": "stri...gft\"",
+      "notes": "Stripe Secret / Restricted Key (rk_test_mock_ Safe Synthetic)"
+    },
+    {
+      "sample_id": "sample_generic_api_key_pos_0470",
+      "provider": "generic_api_key",
+      "masked_sample": "{\"ap...qn\"}",
+      "notes": "Generic High-Entropy API Key with Parameter Binding"
+    },
+    {
+      "sample_id": "sample_generic_api_key_pos_0047",
+      "provider": "generic_api_key",
+      "masked_sample": "api_...524K",
+      "notes": "Generic High-Entropy API Key with Parameter Binding"
+    },
+    {
+      "sample_id": "sample_stripe_pos_0333",
+      "provider": "stripe",
+      "masked_sample": "expo...XCR\"",
+      "notes": "Stripe Secret / Restricted Key (rk_test_mock_ Safe Synthetic)"
+    },
+    {
+      "sample_id": "sample_generic_api_key_pos_0269",
+      "provider": "generic_api_key",
+      "masked_sample": "app_...8Az\"",
+      "notes": "Generic High-Entropy API Key with Parameter Binding"
+    },
+    {
+      "sample_id": "sample_generic_api_key_pos_0339",
+      "provider": "generic_api_key",
+      "masked_sample": "secr...dKm\"",
+      "notes": "Generic High-Entropy API Key with Parameter Binding"
+    },
+    {
+      "sample_id": "sample_stripe_pos_0014",
+      "provider": "stripe",
+      "masked_sample": "cred...wTgR",
+      "notes": "Stripe Secret / Restricted Key (rk_test_mock_ Safe Synthetic)"
+    },
+    {
+      "sample_id": "sample_generic_api_key_pos_0467",
+      "provider": "generic_api_key",
+      "masked_sample": "expo...29-\"",
+      "notes": "Generic High-Entropy API Key with Parameter Binding"
+    },
+    {
+      "sample_id": "sample_generic_api_key_pos_0238",
+      "provider": "generic_api_key",
+      "masked_sample": "secr...hXP\"",
+      "notes": "Generic High-Entropy API Key with Parameter Binding"
+    },
+    {
+      "sample_id": "sample_stripe_pos_0465",
+      "provider": "stripe",
+      "masked_sample": "rk_t...LEBj",
+      "notes": "Stripe Secret / Restricted Key (rk_test_mock_ Safe Synthetic)"
+    }
+  ]
+}

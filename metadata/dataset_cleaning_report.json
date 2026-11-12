@@ -1,0 +1,28 @@
+{
+  "original_count": 10000,
+  "accepted_count": 10000,
+  "rejected_count": 0,
+  "duplicate_count": 0,
+  "missing_field_count": 0,
+  "quarantined_record_count": 1,
+  "positive_count": 5000,
+  "negative_count": 5000,
+  "provider_distribution": {
+    "stripe": 1000,
+    "google_cloud": 1000,
+    "slack": 1000,
+    "generic_api_key": 1000,
+    "aws": 1000,
+    "openai": 1000,
+    "nvidia": 1000,
+    "github": 1000,
+    "azure": 1000,
+    "twilio": 1000
+  },
+  "label_distribution": {
+    "positive": 5000,
+    "negative": 5000
+  },
+  "synthetic_count": 9994,
+  "original_source_count": 6
+}

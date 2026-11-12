@@ -1,0 +1,42 @@
+{
+  "source_name": "Nightfall AI Sample Dataset",
+  "source_url": "https://help.nightfall.ai/nightfall_policy_templates/sample_data",
+  "retrieval_date": "2026-11-11",
+  "license": "Nightfall AI Evaluation Sample Data (De-identified for DLP and Secret Detection Testing)",
+  "terms_summary": "Nightfall provides sample datasets to evaluate and benchmark DLP and secret detection platform capabilities. Data is de-identified.",
+  "security_quarantine_policy": {
+    "quarantine_active": true,
+    "live_credential_testing_forbidden": true,
+    "raw_active_keys_committed": false,
+    "quarantined_samples": [
+      {
+        "file": "api_key--aws_ACTIVE.txt",
+        "reason": "Explicitly labeled active AWS access key in upstream demo dataset. Quarantined and raw value redacted.",
+        "original_prefix": "AKIA2OGYBAH6UREM",
+        "action": "Quarantined. Replaced with synthetic nonfunctional placeholder in public distribution."
+      }
+    ]
+  },
+  "extracted_providers": [
+    "aws",
+    "stripe",
+    "google",
+    "okta",
+    "paypal",
+    "slack",
+    "azure"
+  ],
+  "negative_lookalike_files": [
+    "NOT_api_key--facebook.txt",
+    "NOT_api_key--facebook_2.txt",
+    "NOT_api_key--facebook_3.txt",
+    "NOT_api_key--plaid.txt",
+    "NOT_api_key--salesforce.txt",
+    "NOT_api_key--square.txt",
+    "NOT_api_key--jira.txt",
+    "NOT_api_key--confluence.txt",
+    "NOT_api_key--mws.txt",
+    "NOT_api_key--twitter.txt",
+    "NOT_api_key--datadog.txt"
+  ]
+}
